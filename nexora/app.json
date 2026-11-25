@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "hostel-mngmt",
-    "slug": "hostel-mngmt",
+    "name": "Nexora",
+    "slug": "nexora",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "hostelmngmt",
-    "userInterfaceStyle": "automatic",
+    "scheme": "nexora",
+    "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon"
     },
