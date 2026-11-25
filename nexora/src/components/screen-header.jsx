@@ -2,12 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Colors, Spacing } from '@/constants/theme';
 
-type ScreenHeaderProps = {
-  title: string;
-  subtitle?: string;
-};
-
-export function ScreenHeader({ title, subtitle }: ScreenHeaderProps) {
+export function ScreenHeader({ title, subtitle }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>

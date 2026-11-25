@@ -3,7 +3,7 @@ import { StyleSheet, Text } from 'react-native';
 
 import { Colors } from '@/constants/theme';
 
-function TabIcon({ label, focused }: { label: string; focused: boolean }) {
+function TabIcon({ label, focused }) {
   return (
     <Text
       style={[
