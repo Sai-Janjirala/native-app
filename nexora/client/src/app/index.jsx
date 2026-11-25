@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { FocusTimer } from '@/components/focus-timer';
 import { ScreenHeader } from '@/components/screen-header';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
@@ -82,9 +83,7 @@ export default function HomeScreen() {
               <Text style={styles.completionLabel}>Overall Completion</Text>
               <Text style={styles.completionValue}>{stats.completionRate}%</Text>
               <View style={styles.progressBar}>
-                <View
-                  style={[styles.progressFill, { width: `${stats.completionRate}%` }]}
-                />
+                <View style={[styles.progressFill, { width: `${stats.completionRate}%` }]} />
               </View>
             </View>
 
@@ -97,6 +96,9 @@ export default function HomeScreen() {
             </View>
           </>
         ) : null}
+
+        {/* Focus Timer always visible */}
+        <FocusTimer />
       </ScrollView>
     </SafeAreaView>
   );
@@ -120,16 +122,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: 'hidden',
   },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.light.primary,
-    borderRadius: 4,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
+  progressFill: { height: '100%', backgroundColor: Colors.light.primary, borderRadius: 4 },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   statCard: {
     backgroundColor: Colors.light.surface,
     borderWidth: 1,
