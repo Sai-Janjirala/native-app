@@ -3,6 +3,7 @@ import { authApi, apiRequest } from '@/services/api';
 export const taskApi = {
   getAll: (token) => apiRequest('/tasks', { token }),
   getDashboard: (token) => apiRequest('/tasks/dashboard', { token }),
+  getAnalytics: (token) => apiRequest('/tasks/analytics', { token }),
   create: (token, payload) => apiRequest('/tasks', { method: 'POST', body: payload, token }),
   update: (token, id, payload) =>
     apiRequest(`/tasks/${id}`, { method: 'PUT', body: payload, token }),

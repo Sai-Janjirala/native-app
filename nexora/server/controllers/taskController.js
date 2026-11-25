@@ -120,4 +120,72 @@ async function getDashboardStats(req, res, next) {
   }
 }
 
-module.exports = { getAllTasks, getTaskById, createTask, updateTask, toggleComplete, deleteTask, getDashboardStats };
+async function getAnalytics(req, res, next) {
+  try {
+    const userId = req.user._id;
+    const now = new Date();
+
+    // Last 7 days (today + 6 prior)
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+      days.push({ start, end, label: start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) });
+    }
+
+    const weekly = await Promise.all(
+      days.map(async ({ start, end, label }) => {
+        const [created, completed] = await Promise.all([
+          Task.countDocuments({ userId, createdAt: { $gte: start, $lt: end } }),
+          Task.countDocuments({ userId, isCompleted: true, completedAt: { $gte: start, $lt: end } }),
+        ]);
+        return { label, created, completed };
+      })
+    );
+
+    // By priority
+    const [highTotal, highDone, medTotal, medDone, lowTotal, lowDone] = await Promise.all([
+      Task.countDocuments({ userId, priority: 'high' }),
+      Task.countDocuments({ userId, priority: 'high', isCompleted: true }),
+      Task.countDocuments({ userId, priority: 'medium' }),
+      Task.countDocuments({ userId, priority: 'medium', isCompleted: true }),
+      Task.countDocuments({ userId, priority: 'low' }),
+      Task.countDocuments({ userId, priority: 'low', isCompleted: true }),
+    ]);
+
+    // By category
+    const [workTotal, workDone, studyTotal, studyDone, personalTotal, personalDone] = await Promise.all([
+      Task.countDocuments({ userId, category: 'work' }),
+      Task.countDocuments({ userId, category: 'work', isCompleted: true }),
+      Task.countDocuments({ userId, category: 'study' }),
+      Task.countDocuments({ userId, category: 'study', isCompleted: true }),
+      Task.countDocuments({ userId, category: 'personal' }),
+      Task.countDocuments({ userId, category: 'personal', isCompleted: true }),
+    ]);
+
+    // Last 10 completed tasks
+    const recentCompleted = await Task.find({ userId, isCompleted: true })
+      .sort({ completedAt: -1 })
+      .limit(10)
+      .select('title category priority completedAt');
+
+    return res.json({
+      weekly,
+      byPriority: [
+        { label: 'High', total: highTotal, completed: highDone },
+        { label: 'Medium', total: medTotal, completed: medDone },
+        { label: 'Low', total: lowTotal, completed: lowDone },
+      ],
+      byCategory: [
+        { label: 'Work', total: workTotal, completed: workDone },
+        { label: 'Study', total: studyTotal, completed: studyDone },
+        { label: 'Personal', total: personalTotal, completed: personalDone },
+      ],
+      recentCompleted,
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = { getAllTasks, getTaskById, createTask, updateTask, toggleComplete, deleteTask, getDashboardStats, getAnalytics };

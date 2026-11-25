@@ -7,6 +7,7 @@ const {
   toggleComplete,
   deleteTask,
   getDashboardStats,
+  getAnalytics,
 } = require('../controllers/taskController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -15,6 +16,7 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/dashboard', getDashboardStats);
+router.get('/analytics', getAnalytics);
 router.get('/', getAllTasks);
 router.get('/:id', getTaskById);
 router.post('/', createTask);
