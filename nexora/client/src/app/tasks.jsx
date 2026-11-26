@@ -122,7 +122,7 @@ export default function TasksScreen() {
   function closeModal() {
     setShowForm(false);
     if (isCreateParam) {
-      router.setParams({ create: undefined });
+      router.setParams({ create: undefined, date: undefined });
     }
   }
 
@@ -231,9 +231,10 @@ export default function TasksScreen() {
 
       {modalVisible ? (
         <TaskFormModal
-          key={isCreateParam ? 'new-quick' : editingTask?._id || 'new'}
+          key={isCreateParam ? `new-${params.date || 'quick'}` : editingTask?._id || 'new'}
           visible
           task={isCreateParam ? null : editingTask}
+          initialDate={isCreateParam && typeof params.date === 'string' ? params.date : ''}
           onSave={handleSave}
           onClose={closeModal}
         />
@@ -276,7 +277,7 @@ const styles = StyleSheet.create({
   filterText: { fontSize: 13, fontWeight: '600', color: Colors.light.textSecondary },
   filterTextSelected: { color: Colors.light.primaryText },
   list: { flex: 1 },
-  listContent: { padding: Spacing.three, gap: 10, paddingBottom: Spacing.five },
+  listContent: { padding: Spacing.three, gap: 10, paddingBottom: 104 },
   taskCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',

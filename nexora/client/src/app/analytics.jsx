@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -23,15 +24,17 @@ function BarChart({ data, maxValue }) {
         <View key={i} style={bar.col}>
           <Text style={bar.valueLabel}>{item.value > 0 ? item.value : ''}</Text>
           <View style={bar.track}>
-            <View
-              style={[
-                bar.fill,
-                {
-                  height: `${Math.round((item.value / max) * 100)}%`,
-                  backgroundColor: item.color || Colors.light.primary,
-                },
-              ]}
-            />
+            {item.value > 0 ? (
+              <View
+                style={[
+                  bar.fill,
+                  {
+                    height: `${Math.max(8, Math.round((item.value / max) * 100))}%`,
+                    backgroundColor: item.color || Colors.light.primary,
+                  },
+                ]}
+              />
+            ) : null}
           </View>
           <Text style={bar.label} numberOfLines={1}>{item.label}</Text>
         </View>
@@ -40,7 +43,7 @@ function BarChart({ data, maxValue }) {
   );
 }
 
-function GroupCard({ title, rows, accentKey }) {
+function GroupCard({ title, rows }) {
   const ACCENTS = {
     High: Colors.light.danger,
     Medium: Colors.light.warning,
@@ -97,9 +100,11 @@ export default function AnalyticsScreen() {
     }
   }, [token]);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAnalytics();
+    }, [fetchAnalytics])
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -218,7 +223,7 @@ const bar = StyleSheet.create({
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.light.background },
-  content: { padding: Spacing.three, gap: Spacing.three },
+  content: { padding: Spacing.three, paddingBottom: 104, gap: Spacing.three },
   card: {
     backgroundColor: Colors.light.surface,
     borderWidth: 1,

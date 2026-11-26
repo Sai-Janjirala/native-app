@@ -134,7 +134,7 @@ export default function ProfileScreen() {
         {Platform.OS !== 'web' && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Reminders</Text>
-            <Text style={styles.metaValue} style={styles.notifDescription}>
+            <Text style={[styles.metaValue, styles.notifDescription]}>
               Nexora can remind you 1 hour before a task is due. Enable notifications to use this
               feature.
             </Text>
@@ -161,7 +161,7 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.light.background },
-  content: { padding: Spacing.three, gap: Spacing.three },
+  content: { padding: Spacing.three, paddingBottom: 104, gap: Spacing.three },
   card: {
     backgroundColor: Colors.light.surface,
     borderWidth: 1,
