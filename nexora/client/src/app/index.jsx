@@ -58,10 +58,10 @@ function pickUpcoming(tasks) {
     .slice(0, 4);
 }
 
-function Metric({ label, value, tone, onPress }) {
+function Metric({ label, value, tone, borderTone, onPress }) {
   return (
     <Pressable style={styles.metricWrap} onPress={onPress}>
-      <GlassCard style={styles.metric}>
+      <GlassCard style={[styles.metric, borderTone && { borderTopWidth: 3, borderTopColor: borderTone }]}>
         <Text style={[styles.metricValue, tone && { color: tone }]}>{value}</Text>
         <Text style={styles.metricLabel}>{label}</Text>
       </GlassCard>
@@ -210,7 +210,7 @@ export default function HomeScreen() {
               <Pressable
                 style={styles.secondaryAction}
                 onPress={() => router.push('/calendar')}>
-                <Icon ios="calendar" android="calendar_month" size={18} color={Colors.light.black} />
+                <Icon ios="calendar" android="calendar_month" size={18} color={Colors.light.indigo} />
                 <Text style={styles.secondaryActionText}>Calendar</Text>
               </Pressable>
             </View>
@@ -220,12 +220,14 @@ export default function HomeScreen() {
                 label="Due today"
                 value={stats.todayTasks}
                 tone={Colors.light.primary}
+                borderTone={Colors.light.primary}
                 onPress={() => router.push('/calendar')}
               />
               <Metric
                 label="Overdue"
                 value={stats.overdue}
-                tone={stats.overdue > 0 ? Colors.light.danger : Colors.light.text}
+                tone={stats.overdue > 0 ? Colors.light.rose : Colors.light.teal}
+                borderTone={stats.overdue > 0 ? Colors.light.rose : Colors.light.teal}
                 onPress={() => router.push('/tasks')}
               />
             </View>
@@ -356,13 +358,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: Colors.light.surface,
+    backgroundColor: '#EEF2FF',
     borderWidth: 1,
-    borderColor: Colors.light.border,
+    borderColor: '#C7D2FE',
     borderRadius: 12,
     paddingVertical: 12,
   },
-  secondaryActionText: { color: Colors.light.black, fontSize: 14, fontWeight: '700' },
+  secondaryActionText: { color: Colors.light.indigo, fontSize: 14, fontWeight: '700' },
   metricRow: { flexDirection: 'row', gap: 10 },
   metricWrap: { flex: 1 },
   metric: {
