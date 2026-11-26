@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { GlassCard } from '@/components/glass-card';
 import { Colors, Spacing } from '@/constants/theme';
 
 const MODES = {
@@ -75,8 +76,11 @@ export function FocusTimer() {
       : 'Start';
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.cardTitle}>Focus</Text>
+    <GlassCard>
+      <View style={styles.headerRow}>
+        <Text style={styles.cardTitle}>Focus Timer</Text>
+        <Text style={styles.cardHint}>25m focus · 5m break</Text>
+      </View>
 
       <View style={styles.pills}>
         {Object.entries(MODES).map(([key, value]) => {
@@ -122,23 +126,26 @@ export function FocusTimer() {
           {sessions} focus {sessions === 1 ? 'session' : 'sessions'} completed
         </Text>
       ) : null}
-    </View>
+    </GlassCard>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: Colors.light.surface,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    borderRadius: 12,
-    padding: Spacing.three,
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.two,
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: Colors.light.text,
-    marginBottom: Spacing.two,
+  },
+  cardHint: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.light.textSecondary,
   },
   pills: { flexDirection: 'row', gap: 8, marginBottom: Spacing.three },
   pill: {
