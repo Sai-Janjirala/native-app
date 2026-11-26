@@ -1,15 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 const PRIORITY_CONFIG = {
-  high:   { label: 'High',   bg: '#FEE2E2', text: '#B91C1C' },
-  medium: { label: 'Medium', bg: '#FEF9C3', text: '#92400E' },
+  high:   { label: 'High',   bg: '#FFE4E6', text: '#BE123C' },
+  medium: { label: 'Medium', bg: '#FEF3C7', text: '#B45309' },
   low:    { label: 'Low',    bg: '#DCFCE7', text: '#15803D' },
 };
 
 const CATEGORY_CONFIG = {
-  work:     { label: 'Work',     bg: '#EFF6FF', text: '#1D4ED8' },
-  study:    { label: 'Study',    bg: '#E0E7FF', text: '#1E3A8A' },
-  personal: { label: 'Personal', bg: '#F1F5F9', text: '#0A0A0A' },
+  work:     { label: 'Work',     bg: '#DBEAFE', text: '#1D4ED8' },
+  study:    { label: 'Study',    bg: '#EDE9FE', text: '#6D28D9' },
+  personal: { label: 'Personal', bg: '#CCFBF1', text: '#0F766E' },
 };
 
 export function PriorityBadge({ priority }) {
