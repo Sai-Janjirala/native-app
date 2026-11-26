@@ -1,19 +1,7 @@
 import { Tabs } from 'expo-router';
-import { StyleSheet, Text } from 'react-native';
 
+import { Icon } from '@/components/icon';
 import { Colors } from '@/constants/theme';
-
-function TabIcon({ label, focused }) {
-  return (
-    <Text
-      style={[
-        styles.icon,
-        { color: focused ? Colors.light.primary : Colors.light.textSecondary },
-      ]}>
-      {label}
-    </Text>
-  );
-}
 
 export default function AppTabs() {
   return (
@@ -26,12 +14,12 @@ export default function AppTabs() {
           backgroundColor: Colors.light.surface,
           borderTopColor: Colors.light.border,
           borderTopWidth: 1,
-          height: 62,
-          paddingBottom: 8,
+          height: 60,
+          paddingBottom: 6,
           paddingTop: 6,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '600',
         },
       }}>
@@ -39,44 +27,43 @@ export default function AppTabs() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ focused }) => <TabIcon label="⌂" focused={focused} />,
+          tabBarIcon: ({ color }) => <Icon ios="house.fill" android="home" color={color} />,
         }}
       />
       <Tabs.Screen
         name="tasks"
         options={{
           title: 'Tasks',
-          tabBarIcon: ({ focused }) => <TabIcon label="☑" focused={focused} />,
+          tabBarIcon: ({ color }) => (
+            <Icon ios="checklist" android="checklist" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="calendar"
         options={{
           title: 'Calendar',
-          tabBarIcon: ({ focused }) => <TabIcon label="◫" focused={focused} />,
+          tabBarIcon: ({ color }) => (
+            <Icon ios="calendar" android="calendar_month" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="analytics"
         options={{
           title: 'Analytics',
-          tabBarIcon: ({ focused }) => <TabIcon label="▤" focused={focused} />,
+          tabBarIcon: ({ color }) => (
+            <Icon ios="chart.bar.fill" android="bar_chart" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon label="◯" focused={focused} />,
+          tabBarIcon: ({ color }) => <Icon ios="person.fill" android="person" color={color} />,
         }}
       />
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  icon: {
-    fontSize: 18,
-    lineHeight: 22,
-  },
-});

@@ -1,5 +1,4 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { Colors } from '@/constants/theme';
 
 const PRIORITY_CONFIG = {
   high:   { label: 'High',   bg: '#FEE2E2', text: '#B91C1C' },
@@ -9,8 +8,8 @@ const PRIORITY_CONFIG = {
 
 const CATEGORY_CONFIG = {
   work:     { label: 'Work',     bg: '#EFF6FF', text: '#1D4ED8' },
-  study:    { label: 'Study',    bg: '#F5F3FF', text: '#7C3AED' },
-  personal: { label: 'Personal', bg: '#F0FDF4', text: '#166534' },
+  study:    { label: 'Study',    bg: '#E0E7FF', text: '#1E3A8A' },
+  personal: { label: 'Personal', bg: '#F1F5F9', text: '#0A0A0A' },
 };
 
 export function PriorityBadge({ priority }) {
