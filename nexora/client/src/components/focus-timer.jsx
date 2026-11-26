@@ -5,8 +5,8 @@ import { GlassCard } from '@/components/glass-card';
 import { Colors, Spacing } from '@/constants/theme';
 
 const MODES = {
-  focus: { label: 'Focus', duration: 25 * 60, color: Colors.light.primary },
-  break: { label: 'Break', duration: 5 * 60, color: Colors.light.black },
+  focus: { label: 'Focus', duration: 25 * 60, color: Colors.light.indigo },
+  break: { label: 'Break', duration: 5 * 60, color: Colors.light.teal },
 };
 
 function pad(value) {
