@@ -7,7 +7,7 @@ import { Colors } from '@/constants/theme';
 function TabIcon({ ios, android, color, focused }) {
   return (
     <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
-      <Icon ios={ios} android={android} color={color} size={20} />
+      <Icon ios={ios} android={android} color={focused ? '#FFFFFF' : color} size={19} />
     </View>
   );
 }
@@ -17,8 +17,8 @@ export default function AppTabs() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.light.primary,
-        tabBarInactiveTintColor: Colors.light.textSecondary,
+        tabBarActiveTintColor: '#FFFFFF',
+        tabBarInactiveTintColor: '#94A3B8',
         tabBarStyle: styles.tabBar,
         tabBarLabelStyle: styles.tabLabel,
         tabBarItemStyle: styles.tabItem,
@@ -75,37 +75,37 @@ export default function AppTabs() {
 const styles = StyleSheet.create({
   tabBar: {
     position: 'absolute',
-    left: 16,
-    right: 16,
+    left: 28,
+    right: 28,
     bottom: 16,
-    height: 66,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    height: 58,
+    borderRadius: 28,
+    backgroundColor: Colors.light.black,
     borderTopWidth: 1,
     borderWidth: 1,
-    borderColor: Colors.light.border,
-    paddingBottom: 8,
-    paddingTop: 8,
-    shadowColor: '#0F172A',
+    borderColor: '#1E293B',
+    paddingBottom: 6,
+    paddingTop: 6,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.22,
     shadowRadius: 16,
-    elevation: 8,
+    elevation: 10,
   },
   tabItem: {
-    paddingVertical: 2,
+    paddingVertical: 1,
   },
   tabLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
-    marginTop: 2,
+    marginTop: 1,
   },
   iconWrap: {
-    paddingHorizontal: 12,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
     borderRadius: 12,
   },
   iconWrapActive: {
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: Colors.light.primary,
   },
 });
