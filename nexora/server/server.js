@@ -20,17 +20,24 @@ let usingLocalStore = false;
 // - For web/expo web, allow specific origins if CORS_ORIGIN is set.
 const corsOrigin = process.env.CORS_ORIGIN;
 app.use(
-  cors(
-    corsOrigin
-      ? { origin: corsOrigin.split(',').map((o) => o.trim()) }
-      : {} // {} reflects the request origin, which is safe for native apps
-  )
+  cors({
+    origin: corsOrigin
+      ? corsOrigin.split(',').map((o) => o.trim())
+      : {}, // {} allows all origins (safe for native Expo Go apps)
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
 );
 app.use(express.json());
 
 // Helper: list of local upload paths that would be lost on redeploy
 // (Check your routes/controllers for any `require('fs').writeFile` targeting `uploads/`)
 const LOCAL_UPLOAD_PATHS = [];
+
+// ─── Root health check ──────────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
 // ─── Health check ───────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
