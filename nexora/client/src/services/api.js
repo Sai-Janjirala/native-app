@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '@/constants/api';
+import * as Updates from 'expo-updates';
 
 const REQUEST_TIMEOUT_MS = 60000;
 
@@ -9,17 +10,19 @@ export function setUnauthorizedHandler(handler) {
 }
 
 function connectionErrorMessage(error, defaultMsg) {
+  const url = API_BASE_URL || 'unknown';
+  const updateId = Updates?.updateId ? `[v${Updates.updateId.slice(0,8)}]` : 'embedded';
+
   if (error?.name === 'AbortError') {
-    return defaultMsg
-      ? defaultMsg
-      : 'The server took too long to respond. The backend may be starting up or experiencing high load. Please wait a moment and try again.';
+    return `Timeout reaching ${url} ${updateId}. ${defaultMsg || 'The server took too long to respond. The backend may be starting up or experiencing high load. Please wait a moment and try again.'}`;
   }
 
-  if (!API_BASE_URL || API_BASE_URL.includes('localhost') || API_BASE_URL.includes('10.0.2.2')) {
-    return 'Cannot reach the backend server. Please ensure the server is running on the same Wi‑Fi network as your device.';
+  if (!API_BASE_URL) {
+    return `Cannot reach the backend server. API URL was not configured. Check EXPO_PUBLIC_API_URL. ${defaultMsg || ''}`.trim();
   }
 
-  return `Cannot reach ${API_BASE_URL}. Start the backend and use the same Wi-Fi on your device.`;
+  const networkError = error?.message || error?.toString() || 'Unknown error';
+  return `Cannot reach ${url} ${updateId}. ${networkError}`;
 }
 
 export async function apiRequest(path, { method = 'GET', body, token } = {}) {

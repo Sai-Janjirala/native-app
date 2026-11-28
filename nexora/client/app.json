@@ -2,7 +2,7 @@
   "expo": {
     "name": "Nexora",
     "slug": "nexora",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "nexora",
@@ -33,7 +33,7 @@
       ]
     ],
     "extra": {
-      "apiUrl": "",
+      "apiUrl": "https://native-app-x5bs.onrender.com/api",
       "router": {
         "asyncRoutes": {
           "web": true

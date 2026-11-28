@@ -1,0 +1,28 @@
+name: Auto Update APK
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'nexora/client/**'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./nexora/client
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: nexora/client/package-lock.json
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: npm ci
+      - run: eas update --branch preview --environment preview --message "${{ github.event.head_commit.message }}"
