@@ -1,11 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Radii } from '@/constants/theme';
 
-export function ScreenHeader({ title, subtitle }) {
+export function ScreenHeader({ title, subtitle, accent = Colors.light.primary }) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      <View style={styles.titleRow}>
+        <View style={[styles.accent, { backgroundColor: accent }]} />
+        <Text style={styles.title}>{title}</Text>
+      </View>
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
     </View>
   );
@@ -13,19 +16,28 @@ export function ScreenHeader({ title, subtitle }) {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: Spacing.three,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border,
-    marginBottom: Spacing.three,
+    gap: 4,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+  },
+  accent: {
+    width: 4,
+    height: 22,
+    borderRadius: Radii.pill,
   },
   title: {
     fontSize: 26,
-    fontWeight: '700',
+    fontWeight: '800',
     color: Colors.light.text,
+    letterSpacing: -0.6,
   },
   subtitle: {
-    fontSize: 14,
-    color: Colors.light.textSecondary,
-    marginTop: 4,
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.light.textMuted,
+    paddingLeft: 13,
   },
 });

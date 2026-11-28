@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { authApi, setUnauthorizedHandler } from '@/services/api';
 
 const TOKEN_KEY = 'nexora_auth_token';
+const USER_KEY = 'nexora_auth_user';
 
 const AuthContext = createContext(null);
 
@@ -15,50 +16,86 @@ export function AuthProvider({ children }) {
   async function clearSession() {
     setUser(null);
     setToken(null);
-    await AsyncStorage.removeItem(TOKEN_KEY);
+    await Promise.all([
+      AsyncStorage.removeItem(TOKEN_KEY),
+      AsyncStorage.removeItem(USER_KEY),
+    ]);
+  }
+
+  async function saveSession(data) {
+    await Promise.all([
+      AsyncStorage.setItem(TOKEN_KEY, data.token),
+      AsyncStorage.setItem(USER_KEY, JSON.stringify(data.user)),
+    ]);
+    setToken(data.token);
+    setUser(data.user);
   }
 
   useEffect(() => {
+    let active = true;
+
     setUnauthorizedHandler(() => {
       clearSession();
     });
 
     async function restoreSession() {
       try {
-        const storedToken = await AsyncStorage.getItem(TOKEN_KEY);
-        if (!storedToken) {
+        const [storedToken, storedUser] = await Promise.all([
+          AsyncStorage.getItem(TOKEN_KEY),
+          AsyncStorage.getItem(USER_KEY),
+        ]);
+
+        if (!active || !storedToken) {
           return;
         }
-        const data = await authApi.getMe(storedToken);
+
         setToken(storedToken);
+
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+          setIsLoading(false);
+          return;
+        }
+
+        const data = await authApi.getMe(storedToken);
+        if (!active) {
+          return;
+        }
+
         setUser(data.user);
+        await AsyncStorage.setItem(USER_KEY, JSON.stringify(data.user));
       } catch {
-        await AsyncStorage.removeItem(TOKEN_KEY);
+        if (active) {
+          await clearSession();
+        }
       } finally {
-        setIsLoading(false);
+        if (active) {
+          setIsLoading(false);
+        }
       }
     }
 
     restoreSession();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   async function signIn(email, password) {
     const data = await authApi.login({ email, password });
-    await AsyncStorage.setItem(TOKEN_KEY, data.token);
-    setToken(data.token);
-    setUser(data.user);
+    await saveSession(data);
   }
 
   async function signUp(name, email, password) {
     const data = await authApi.register({ name, email, password });
-    await AsyncStorage.setItem(TOKEN_KEY, data.token);
-    setToken(data.token);
-    setUser(data.user);
+    await saveSession(data);
   }
 
   async function updateUserName(name) {
     const data = await authApi.updateProfile(token, { name });
     setUser(data.user);
+    await AsyncStorage.setItem(USER_KEY, JSON.stringify(data.user));
     return data.user;
   }
 

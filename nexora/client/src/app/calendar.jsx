@@ -16,7 +16,7 @@ import { GlassCard } from '@/components/glass-card';
 import { Icon } from '@/components/icon';
 import { ScreenHeader } from '@/components/screen-header';
 import { CategoryBadge, PriorityBadge } from '@/components/task-badges';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Radii, Shadows, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { syncTaskReminder } from '@/services/notifications';
 import { taskApi } from '@/services/taskApi';
@@ -29,12 +29,24 @@ function toInputDate(date) {
   return `${y}-${m}-${d}`;
 }
 
+const PRIORITY_ACCENT = {
+  high: '#F43F5E',
+  medium: '#F59E0B',
+  low: '#22C55E',
+};
+
 function TaskRow({ task, onToggle }) {
   const overdue = isOverdue(task);
 
   return (
     <Pressable onPress={() => onToggle(task)}>
       <GlassCard style={[styles.taskRow, task.isCompleted && styles.taskRowDone]}>
+        <View
+          style={[
+            styles.rowAccent,
+            { backgroundColor: PRIORITY_ACCENT[task.priority] || Colors.light.primary },
+          ]}
+        />
         <View style={[styles.checkbox, task.isCompleted && styles.checkboxDone]}>
           {task.isCompleted ? <Icon ios="checkmark" android="check" size={12} color="#FFFFFF" /> : null}
         </View>
@@ -306,18 +318,19 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.three, paddingBottom: 104, gap: Spacing.three },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   todayPill: {
-    backgroundColor: Colors.light.black,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    backgroundColor: Colors.light.dock,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: Radii.pill,
+    ...Shadows.soft,
   },
   todayPillText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
   weekCard: { padding: Spacing.two + 4, gap: Spacing.two },
   weekNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   navArrow: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
+    width: 32,
+    height: 32,
+    borderRadius: Radii.sm,
     backgroundColor: Colors.light.background,
     alignItems: 'center',
     justifyContent: 'center',
@@ -326,20 +339,24 @@ const styles = StyleSheet.create({
   weekStrip: { flexGrow: 0 },
   dayChip: {
     alignItems: 'center',
-    paddingVertical: 9,
+    paddingVertical: 10,
     paddingHorizontal: 6,
-    borderRadius: 12,
+    borderRadius: Radii.md,
     marginRight: 8,
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.light.surfaceMuted,
     borderWidth: 1,
     borderColor: Colors.light.border,
-    width: 50,
+    width: 52,
   },
   dayChipToday: {
-    borderColor: Colors.light.black,
+    borderColor: Colors.light.primary,
     borderWidth: 1.5,
   },
-  dayChipSelected: { backgroundColor: Colors.light.primary, borderColor: Colors.light.primary },
+  dayChipSelected: {
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+    ...Shadows.accent,
+  },
   dayName: { fontSize: 11, fontWeight: '600', color: Colors.light.textSecondary, marginBottom: 2 },
   dayNum: { fontSize: 16, fontWeight: '700', color: Colors.light.text },
   dayTextSelected: { color: Colors.light.primaryText },
@@ -366,21 +383,22 @@ const styles = StyleSheet.create({
   addDayBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 5,
     backgroundColor: Colors.light.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: Radii.pill,
+    ...Shadows.accent,
   },
   addDayText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   dayProgressTrack: {
-    height: 6,
+    height: 8,
     backgroundColor: '#DBEAFE',
-    borderRadius: 3,
+    borderRadius: Radii.pill,
     overflow: 'hidden',
   },
-  dayProgressFill: { height: '100%', backgroundColor: Colors.light.primary, borderRadius: 3 },
-  section: { gap: 8 },
+  dayProgressFill: { height: '100%', backgroundColor: Colors.light.primary, borderRadius: Radii.pill },
+  section: { gap: 10 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.light.text },
   dangerTitle: { color: Colors.light.danger },
   mutedTitle: { fontSize: 15, fontWeight: '700', color: Colors.light.textSecondary },
@@ -388,16 +406,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,
-    padding: 12,
+    padding: 14,
+    paddingLeft: 18,
+    position: 'relative',
+  },
+  rowAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
   },
   taskRowDone: { opacity: 0.65 },
   checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 5,
-    borderWidth: 1.5,
-    borderColor: '#C5CAD3',
-    marginTop: 2,
+    width: 20,
+    height: 20,
+    borderRadius: Radii.xs,
+    borderWidth: 1.8,
+    borderColor: Colors.light.borderStrong,
+    marginTop: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

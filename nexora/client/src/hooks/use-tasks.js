@@ -1,79 +1,88 @@
-import { useCallback, useEffect, useState } from 'react';
-import { taskApi } from '@/services/taskApi';
-import { scheduleTaskReminder, cancelTaskReminder } from '@/services/notifications';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
+
 import { useAuth } from '@/context/AuthContext';
+import { clearTaskReminder, syncTaskReminder } from '@/services/notifications';
+import { taskApi } from '@/services/taskApi';
 
 export function useTasks() {
   const { token } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const hasLoaded = useRef(false);
+  const requestId = useRef(0);
 
-  const fetchTasks = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-    setError('');
+  const fetchTasks = useCallback(async ({ mode = 'initial' } = {}) => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    const id = ++requestId.current;
+    if (mode === 'refresh') setRefreshing(true);
+    else if (!hasLoaded.current) setLoading(true);
+
     try {
       const data = await taskApi.getAll(token);
+      if (requestId.current !== id) return;
       setTasks(data.tasks || []);
+      setError('');
+      hasLoaded.current = true;
     } catch (err) {
+      if (requestId.current !== id) return;
       setError(err.message || 'Could not load tasks.');
     } finally {
-      setLoading(false);
+      if (requestId.current === id) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [token]);
 
-  useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchTasks({ mode: hasLoaded.current ? 'silent' : 'initial' });
+    }, [fetchTasks])
+  );
 
   async function createTask(payload) {
     const data = await taskApi.create(token, payload);
-    const task = data.task;
-    // Schedule reminder if due date is set
-    const notifId = await scheduleTaskReminder(task);
-    setTasks((prev) => [{ ...task, _notifId: notifId }, ...prev]);
-    return task;
+    await syncTaskReminder(data.task);
+    setTasks((prev) => [data.task, ...prev]);
+    return data.task;
   }
 
   async function updateTask(id, payload) {
     const data = await taskApi.update(token, id, payload);
-    const updated = data.task;
-    setTasks((prev) =>
-      prev.map((t) => {
-        if (t._id !== id) return t;
-        // Reschedule notification if due date changed
-        if (t._notifId) cancelTaskReminder(t._notifId);
-        return updated;
-      })
-    );
-    // Schedule new reminder
-    scheduleTaskReminder(updated);
-    return updated;
+    await syncTaskReminder(data.task);
+    setTasks((prev) => prev.map((task) => (task._id === id ? data.task : task)));
+    return data.task;
   }
 
   async function toggleTask(id) {
     const data = await taskApi.toggle(token, id);
-    setTasks((prev) =>
-      prev.map((t) => {
-        if (t._id !== id) return t;
-        // Cancel reminder if completed
-        if (data.task.isCompleted && t._notifId) {
-          cancelTaskReminder(t._notifId);
-        }
-        return data.task;
-      })
-    );
+    await syncTaskReminder(data.task);
+    setTasks((prev) => prev.map((task) => (task._id === id ? data.task : task)));
+    return data.task;
   }
 
   async function deleteTask(id) {
     await taskApi.remove(token, id);
-    setTasks((prev) => {
-      const task = prev.find((t) => t._id === id);
-      if (task?._notifId) cancelTaskReminder(task._notifId);
-      return prev.filter((t) => t._id !== id);
-    });
+    await clearTaskReminder(id);
+    setTasks((prev) => prev.filter((task) => task._id !== id));
   }
 
-  return { tasks, loading, error, fetchTasks, createTask, updateTask, toggleTask, deleteTask };
+  return {
+    tasks,
+    loading,
+    refreshing,
+    error,
+    fetchTasks,
+    createTask,
+    updateTask,
+    toggleTask,
+    deleteTask,
+  };
 }

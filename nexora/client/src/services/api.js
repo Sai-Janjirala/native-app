@@ -1,9 +1,19 @@
 import { API_BASE_URL } from '@/constants/api';
 
+const REQUEST_TIMEOUT_MS = 8000;
+
 let unauthorizedHandler = null;
 
 export function setUnauthorizedHandler(handler) {
   unauthorizedHandler = handler;
+}
+
+function connectionError(error) {
+  if (error?.name === 'AbortError') {
+    return `Server took too long to respond at ${API_BASE_URL}. Check that the backend is running.`;
+  }
+
+  return `Cannot reach ${API_BASE_URL}. Start the backend and use the same Wi-Fi on your device.`;
 }
 
 export async function apiRequest(path, { method = 'GET', body, token } = {}) {
@@ -15,11 +25,22 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    throw new Error(connectionError(error));
+  } finally {
+    clearTimeout(timeout);
+  }
 
   const data = await response.json().catch(() => ({}));
 

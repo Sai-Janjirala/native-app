@@ -16,7 +16,7 @@ import { FocusTimer } from '@/components/focus-timer';
 import { GlassCard } from '@/components/glass-card';
 import { Icon } from '@/components/icon';
 import { ScreenHeader } from '@/components/screen-header';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Radii, Shadows, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { syncTaskReminder } from '@/services/notifications';
 import { taskApi } from '@/services/taskApi';
@@ -29,6 +29,12 @@ const QUOTES = [
   'Progress over perfection. Keep moving forward.',
   'One finished task is worth ten planned ones.',
 ];
+
+const PRIORITY_ACCENT = {
+  high: '#F43F5E',
+  medium: '#F59E0B',
+  low: '#22C55E',
+};
 
 function getMomentumLabel(rate, total) {
   if (total === 0) return 'Fresh slate';
@@ -164,6 +170,7 @@ export default function HomeScreen() {
           <>
             <Pressable onPress={() => router.push('/analytics')}>
               <GlassCard variant="dark" style={styles.summary}>
+                <View style={styles.summaryGlow} pointerEvents="none" />
                 <View style={styles.summaryHeader}>
                   <View style={styles.summaryTop}>
                     <Text style={styles.summaryValue}>{stats.completionRate}%</Text>
@@ -269,6 +276,12 @@ export default function HomeScreen() {
 
                     return (
                       <GlassCard key={task._id} style={styles.upcomingRow}>
+                        <View
+                          style={[
+                            styles.upcomingAccent,
+                            { backgroundColor: PRIORITY_ACCENT[task.priority] || Colors.light.primary },
+                          ]}
+                        />
                         <Pressable
                           style={[styles.checkbox, overdue && styles.checkboxOverdue]}
                           onPress={() => quickComplete(task)}
@@ -305,32 +318,42 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.light.background },
   content: { padding: Spacing.three, paddingBottom: 104, gap: Spacing.three },
   loader: { marginTop: 32 },
-  summary: { padding: Spacing.three + 2 },
+  summary: { padding: Spacing.three + 2, position: 'relative' },
+  summaryGlow: {
+    position: 'absolute',
+    top: -60,
+    right: -50,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: Colors.light.primary,
+    opacity: 0.22,
+  },
   summaryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   summaryTop: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  summaryValue: { fontSize: 36, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.8 },
+  summaryValue: { fontSize: 40, fontWeight: '800', color: '#FFFFFF', letterSpacing: -1 },
   summaryLabel: { fontSize: 15, color: '#94A3B8', fontWeight: '600' },
   momentumBadge: {
     backgroundColor: 'rgba(37, 99, 235, 0.25)',
     borderWidth: 1,
     borderColor: '#3B82F6',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    borderRadius: Radii.pill,
   },
   momentumText: { color: '#93C5FD', fontSize: 12, fontWeight: '700' },
   progressBar: {
-    height: 8,
-    backgroundColor: '#1E293B',
-    borderRadius: 4,
+    height: 10,
+    backgroundColor: 'rgba(148, 163, 184, 0.18)',
+    borderRadius: Radii.pill,
     overflow: 'hidden',
-    marginTop: 14,
+    marginTop: 16,
   },
-  progressFill: { height: '100%', backgroundColor: '#3B82F6', borderRadius: 4 },
+  progressFill: { height: '100%', backgroundColor: '#3B82F6', borderRadius: Radii.pill },
   milestones: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -346,10 +369,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 7,
     backgroundColor: Colors.light.primary,
-    borderRadius: 12,
-    paddingVertical: 12,
+    borderRadius: Radii.pill,
+    paddingVertical: 14,
+    ...Shadows.accent,
   },
   primaryActionText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
   secondaryAction: {
@@ -357,36 +381,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 7,
     backgroundColor: '#EEF2FF',
     borderWidth: 1,
     borderColor: '#C7D2FE',
-    borderRadius: 12,
-    paddingVertical: 12,
+    borderRadius: Radii.pill,
+    paddingVertical: 14,
   },
   secondaryActionText: { color: Colors.light.indigo, fontSize: 14, fontWeight: '700' },
   metricRow: { flexDirection: 'row', gap: 10 },
   metricWrap: { flex: 1 },
   metric: {
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: Spacing.three,
   },
-  metricValue: { fontSize: 24, fontWeight: '700', color: Colors.light.text },
-  metricLabel: { marginTop: 2, fontSize: 13, color: Colors.light.textSecondary, fontWeight: '600' },
+  metricValue: { fontSize: 26, fontWeight: '800', color: Colors.light.text, letterSpacing: -0.5 },
+  metricLabel: { marginTop: 2, fontSize: 13, color: Colors.light.textMuted, fontWeight: '600' },
   guideCard: { gap: 6 },
   guideTitle: { fontSize: 16, fontWeight: '700', color: Colors.light.black, marginBottom: 4 },
   guideStep: { fontSize: 13, lineHeight: 20, color: Colors.light.textSecondary },
   guideBtn: {
     marginTop: 8,
     backgroundColor: Colors.light.primary,
-    borderRadius: 10,
-    paddingVertical: 11,
+    borderRadius: Radii.pill,
+    paddingVertical: 12,
     alignItems: 'center',
+    ...Shadows.accent,
   },
   guideBtnText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
-  section: { gap: 8 },
+  section: { gap: 10 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: Colors.light.text },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: Colors.light.text, letterSpacing: -0.2 },
   sectionLink: { fontSize: 14, fontWeight: '600', color: Colors.light.primary },
   emptyLine: { fontSize: 14, color: Colors.light.textSecondary },
   upcomingRow: {
@@ -394,12 +419,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingLeft: 18,
+    paddingVertical: 14,
+    position: 'relative',
+  },
+  upcomingAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
   },
   checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 7,
+    width: 24,
+    height: 24,
+    borderRadius: Radii.xs + 2,
     borderWidth: 1.8,
     borderColor: Colors.light.primary,
     alignItems: 'center',
@@ -411,7 +445,7 @@ const styles = StyleSheet.create({
   },
   upcomingBody: { flex: 1, gap: 2 },
   upcomingTitle: { fontSize: 15, fontWeight: '600', color: Colors.light.text },
-  upcomingMeta: { fontSize: 12, color: Colors.light.textSecondary },
+  upcomingMeta: { fontSize: 12, color: Colors.light.textMuted },
   overdueText: { color: Colors.light.danger },
   errorBox: { alignItems: 'center', marginTop: 20 },
   errorText: { color: Colors.light.danger, marginBottom: 12, fontSize: 14, textAlign: 'center' },

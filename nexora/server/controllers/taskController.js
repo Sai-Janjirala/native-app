@@ -1,7 +1,36 @@
-const Task = require('../models/Task');
+const { Task } = require('../config/store');
 
 function taskQuery(req) {
   return Task.find({ userId: req.user._id });
+}
+
+function resolveTzOffset(req, res) {
+  if (req.query.tzOffset === undefined || req.query.tzOffset === '') {
+    return new Date().getTimezoneOffset();
+  }
+
+  const offset = Number(req.query.tzOffset);
+  if (!Number.isInteger(offset) || offset < -840 || offset > 840) {
+    res.status(400).json({ message: 'Invalid timezone offset' });
+    return null;
+  }
+
+  return offset;
+}
+
+function startOfZonedDay(now, tzOffsetMinutes, dayDelta = 0) {
+  const local = new Date(now.getTime() - tzOffsetMinutes * 60 * 1000);
+  const utcMidnight = Date.UTC(
+    local.getUTCFullYear(),
+    local.getUTCMonth(),
+    local.getUTCDate() + dayDelta
+  );
+  return new Date(utcMidnight + tzOffsetMinutes * 60 * 1000);
+}
+
+function formatZonedDay(date, tzOffsetMinutes, options) {
+  const shifted = new Date(date.getTime() - tzOffsetMinutes * 60 * 1000);
+  return shifted.toLocaleDateString('en-US', { ...options, timeZone: 'UTC' });
 }
 
 async function getAllTasks(req, res, next) {
@@ -99,16 +128,22 @@ async function deleteTask(req, res, next) {
 
 async function getDashboardStats(req, res, next) {
   try {
+    const tzOffset = resolveTzOffset(req, res);
+    if (tzOffset === null) return undefined;
+
     const userId = req.user._id;
-    const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+    const todayStart = startOfZonedDay(new Date(), tzOffset, 0);
+    const todayEnd = startOfZonedDay(new Date(), tzOffset, 1);
 
     const [total, completed, todayTasks, overdue] = await Promise.all([
       Task.countDocuments({ userId }),
       Task.countDocuments({ userId, isCompleted: true }),
       Task.countDocuments({ userId, dueDate: { $gte: todayStart, $lt: todayEnd } }),
-      Task.countDocuments({ userId, isCompleted: false, dueDate: { $lt: now } }),
+      Task.countDocuments({
+        userId,
+        isCompleted: false,
+        dueDate: { $ne: null, $lt: todayStart },
+      }),
     ]);
 
     const pending = total - completed;
@@ -122,24 +157,31 @@ async function getDashboardStats(req, res, next) {
 
 async function getAnalytics(req, res, next) {
   try {
+    const tzOffset = resolveTzOffset(req, res);
+    if (tzOffset === null) return undefined;
+
     const userId = req.user._id;
     const now = new Date();
 
-    // Last 7 days (today + 6 prior)
     const days = [];
     for (let i = 6; i >= 0; i--) {
-      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-      const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
-      days.push({ start, end, label: start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) });
+      const start = startOfZonedDay(now, tzOffset, -i);
+      const end = startOfZonedDay(now, tzOffset, -i + 1);
+      days.push({
+        start,
+        end,
+        label: formatZonedDay(start, tzOffset, { weekday: 'short', month: 'short', day: 'numeric' }),
+        shortLabel: formatZonedDay(start, tzOffset, { weekday: 'short' }),
+      });
     }
 
     const weekly = await Promise.all(
-      days.map(async ({ start, end, label }) => {
+      days.map(async ({ start, end, label, shortLabel }) => {
         const [created, completed] = await Promise.all([
           Task.countDocuments({ userId, createdAt: { $gte: start, $lt: end } }),
           Task.countDocuments({ userId, isCompleted: true, completedAt: { $gte: start, $lt: end } }),
         ]);
-        return { label, created, completed };
+        return { label, shortLabel, created, completed };
       })
     );
 

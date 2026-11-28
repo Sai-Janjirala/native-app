@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Radii, Shadows, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 
 export function AuthScreen() {
@@ -21,25 +21,39 @@ export function AuthScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const nameRef = useRef(null);
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
 
   const isRegister = mode === 'register';
 
-  function toggleMode() {
+  function switchMode(nextMode) {
+    if (nextMode === mode) {
+      return;
+    }
     setError('');
-    setMode(isRegister ? 'login' : 'register');
+    setShowPassword(false);
+    setMode(nextMode);
   }
 
   async function handleSubmit() {
     setError('');
 
+    const cleanEmail = email.trim().toLowerCase();
+
     if (isRegister && name.trim().length < 2) {
-      setError('Please enter your full name (at least 2 characters).');
+      setError('Enter your name (at least 2 characters).');
       return;
     }
-    if (!email.trim() || !password) {
+    if (!cleanEmail || !password) {
       setError('Email and password are required.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setError('Enter a valid email address.');
       return;
     }
     if (isRegister && password.length < 6) {
@@ -50,12 +64,12 @@ export function AuthScreen() {
     setSubmitting(true);
     try {
       if (isRegister) {
-        await signUp(name.trim(), email.trim(), password);
+        await signUp(name.trim(), cleanEmail, password);
       } else {
-        await signIn(email.trim(), password);
+        await signIn(cleanEmail, password);
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed. Check your connection and try again.');
+      setError(err.message || 'Something went wrong. Try again.');
     } finally {
       setSubmitting(false);
     }
@@ -67,15 +81,50 @@ export function AuthScreen() {
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <View style={styles.header}>
+          <View style={styles.hero}>
+            <View style={styles.logo}>
+              <Text style={styles.logoText}>N</Text>
+            </View>
             <Text style={styles.brand}>Nexora</Text>
             <Text style={styles.tagline}>
-              Organize your work. Manage your time. Track your progress.
+              {isRegister
+                ? 'Create your account and keep every task in one place.'
+                : 'Welcome back. Your tasks are waiting.'}
             </Text>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>{isRegister ? 'Create Account' : 'Sign In'}</Text>
+            <View style={styles.segment}>
+              <Pressable
+                style={[styles.segmentButton, !isRegister && styles.segmentActive]}
+                onPress={() => switchMode('login')}
+                accessibilityRole="button"
+                accessibilityState={{ selected: !isRegister }}>
+                <Text style={[styles.segmentText, !isRegister && styles.segmentTextActive]}>
+                  Sign In
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[styles.segmentButton, isRegister && styles.segmentActive]}
+                onPress={() => switchMode('register')}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isRegister }}>
+                <Text style={[styles.segmentText, isRegister && styles.segmentTextActive]}>
+                  Sign Up
+                </Text>
+              </Pressable>
+            </View>
+
+            <View style={styles.formHeader}>
+              <Text style={styles.cardTitle}>
+                {isRegister ? 'Create your account' : 'Sign in to Nexora'}
+              </Text>
+              <Text style={styles.cardSubtitle}>
+                {isRegister
+                  ? 'It only takes a few seconds.'
+                  : 'Enter your email and password to continue.'}
+              </Text>
+            </View>
 
             {error ? (
               <View style={styles.errorBox}>
@@ -85,14 +134,21 @@ export function AuthScreen() {
 
             {isRegister ? (
               <View style={styles.field}>
-                <Text style={styles.label}>Name</Text>
+                <Text style={styles.label}>Full name</Text>
                 <TextInput
+                  ref={nameRef}
                   style={styles.input}
-                  placeholder="Your name"
+                  placeholder="e.g. Alex Morgan"
                   placeholderTextColor={Colors.light.textSecondary}
                   value={name}
                   onChangeText={setName}
                   autoCapitalize="words"
+                  autoComplete="name"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                  editable={!submitting}
+                  maxLength={60}
+                  onSubmitEditing={() => emailRef.current?.focus()}
                 />
               </View>
             ) : null}
@@ -100,6 +156,7 @@ export function AuthScreen() {
             <View style={styles.field}>
               <Text style={styles.label}>Email</Text>
               <TextInput
+                ref={emailRef}
                 style={styles.input}
                 placeholder="you@example.com"
                 placeholderTextColor={Colors.light.textSecondary}
@@ -108,40 +165,85 @@ export function AuthScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                autoComplete="email"
+                textContentType="username"
+                returnKeyType="next"
+                blurOnSubmit={false}
+                editable={!submitting}
+                onSubmitEditing={() => passwordRef.current?.focus()}
               />
             </View>
 
             <View style={styles.field}>
               <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="At least 6 characters"
-                placeholderTextColor={Colors.light.textSecondary}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
+              <View style={styles.passwordWrap}>
+                <TextInput
+                  ref={passwordRef}
+                  style={[styles.input, styles.passwordInput]}
+                  placeholder={isRegister ? 'At least 6 characters' : 'Your password'}
+                  placeholderTextColor={Colors.light.textSecondary}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete={isRegister ? 'new-password' : 'current-password'}
+                  textContentType={isRegister ? 'newPassword' : 'password'}
+                  returnKeyType="go"
+                  editable={!submitting}
+                  onSubmitEditing={handleSubmit}
+                />
+                <Pressable
+                  style={styles.visibilityButton}
+                  onPress={() => setShowPassword((visible) => !visible)}
+                  accessibilityRole="button"
+                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}>
+                  <Text style={styles.visibilityText}>{showPassword ? 'Hide' : 'Show'}</Text>
+                </Pressable>
+              </View>
+              <Text style={styles.hint}>
+                {isRegister
+                  ? 'Use at least 6 characters.'
+                  : 'Use the password you created when you signed up.'}
+              </Text>
             </View>
 
             <Pressable
               style={[styles.primaryButton, submitting && styles.buttonDisabled]}
               onPress={handleSubmit}
-              disabled={submitting}>
-              {submitting ? (
-                <ActivityIndicator color={Colors.light.primaryText} />
-              ) : (
+              disabled={submitting}
+              accessibilityRole="button">
+              <View style={styles.buttonContent}>
+                {submitting ? (
+                  <ActivityIndicator color={Colors.light.primaryText} size="small" />
+                ) : null}
                 <Text style={styles.primaryButtonText}>
-                  {isRegister ? 'Create Account' : 'Sign In'}
+                  {submitting
+                    ? isRegister
+                      ? 'Creating account...'
+                      : 'Signing in...'
+                    : isRegister
+                      ? 'Create Account'
+                      : 'Sign In'}
                 </Text>
-              )}
+              </View>
             </Pressable>
 
-            <Pressable style={styles.switchButton} onPress={toggleMode} disabled={submitting}>
+            <Pressable
+              style={styles.switchButton}
+              onPress={() => switchMode(isRegister ? 'login' : 'register')}
+              disabled={submitting}
+              accessibilityRole="button">
               <Text style={styles.switchText}>
-                {isRegister ? 'Already have an account? Sign In' : "Don't have an account? Register"}
+                {isRegister ? 'Already have an account? ' : 'New to Nexora? '}
+                <Text style={styles.switchLink}>
+                  {isRegister ? 'Sign In' : 'Create Account'}
+                </Text>
               </Text>
             </Pressable>
           </View>
+
+          <Text style={styles.footerNote}>Stay organized. One task at a time.</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -158,75 +260,159 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: Spacing.three,
+    paddingVertical: Spacing.four,
   },
-  header: {
+  hero: {
+    alignItems: 'center',
     marginBottom: Spacing.four,
+  },
+  logo: {
+    width: 60,
+    height: 60,
+    borderRadius: Radii.lg,
+    backgroundColor: Colors.light.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+    ...Shadows.accent,
+  },
+  logoText: {
+    color: Colors.light.primaryText,
+    fontSize: 30,
+    fontWeight: '800',
   },
   brand: {
     fontSize: 32,
-    fontWeight: '700',
-    color: Colors.light.primary,
+    fontWeight: '800',
+    color: Colors.light.text,
+    letterSpacing: -0.8,
   },
   tagline: {
     fontSize: 14,
-    color: Colors.light.textSecondary,
+    color: Colors.light.textMuted,
     marginTop: 6,
     lineHeight: 20,
+    textAlign: 'center',
   },
   card: {
     backgroundColor: Colors.light.surface,
     borderWidth: 1,
     borderColor: Colors.light.border,
-    borderRadius: 10,
+    borderRadius: Radii.xl,
     padding: Spacing.three,
+    ...Shadows.card,
   },
-  cardTitle: {
-    fontSize: 20,
+  segment: {
+    flexDirection: 'row',
+    backgroundColor: Colors.light.backgroundAlt,
+    borderRadius: Radii.pill,
+    padding: 4,
+    marginBottom: Spacing.four,
+  },
+  segmentButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: Radii.pill,
+    alignItems: 'center',
+  },
+  segmentActive: {
+    backgroundColor: Colors.light.surface,
+    ...Shadows.soft,
+  },
+  segmentText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.light.textSecondary,
+  },
+  segmentTextActive: {
+    color: Colors.light.primary,
     fontWeight: '700',
-    color: Colors.light.text,
+  },
+  formHeader: {
     marginBottom: Spacing.three,
   },
+  cardTitle: {
+    fontSize: 21,
+    fontWeight: '700',
+    color: Colors.light.text,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+    marginTop: 4,
+  },
   errorBox: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: '#FEF2F2',
     borderWidth: 1,
-    borderColor: '#FCA5A5',
-    borderRadius: 8,
-    padding: Spacing.two,
+    borderColor: '#FECACA',
+    borderRadius: 10,
+    padding: Spacing.two + 4,
     marginBottom: Spacing.three,
   },
   errorText: {
     color: Colors.light.danger,
     fontSize: 13,
     fontWeight: '600',
+    lineHeight: 18,
   },
   field: {
     marginBottom: Spacing.three,
   },
   label: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.light.text,
-    marginBottom: 6,
+    marginBottom: 7,
   },
   input: {
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.light.surfaceMuted,
     borderWidth: 1,
     borderColor: Colors.light.border,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: Radii.md,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 15,
     color: Colors.light.text,
   },
+  passwordWrap: {
+    position: 'relative',
+  },
+  passwordInput: {
+    paddingRight: 64,
+  },
+  visibilityButton: {
+    position: 'absolute',
+    right: 8,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  visibilityText: {
+    color: Colors.light.primary,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  hint: {
+    fontSize: 12,
+    color: Colors.light.textSecondary,
+    marginTop: 6,
+  },
   primaryButton: {
     backgroundColor: Colors.light.primary,
-    borderRadius: 8,
-    paddingVertical: 13,
+    borderRadius: Radii.pill,
+    paddingVertical: 14,
     alignItems: 'center',
     marginTop: Spacing.one,
+    ...Shadows.accent,
   },
   buttonDisabled: {
-    opacity: 0.7,
+    opacity: 0.75,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   primaryButtonText: {
     color: Colors.light.primaryText,
@@ -236,11 +422,21 @@ const styles = StyleSheet.create({
   switchButton: {
     marginTop: Spacing.three,
     alignItems: 'center',
-    paddingVertical: 6,
+    paddingVertical: 4,
   },
   switchText: {
-    color: Colors.light.primary,
+    color: Colors.light.textSecondary,
     fontSize: 14,
-    fontWeight: '600',
+    textAlign: 'center',
+  },
+  switchLink: {
+    color: Colors.light.primary,
+    fontWeight: '700',
+  },
+  footerNote: {
+    marginTop: Spacing.three,
+    color: Colors.light.textSecondary,
+    fontSize: 12,
+    textAlign: 'center',
   },
 });

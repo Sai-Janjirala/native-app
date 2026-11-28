@@ -188,7 +188,7 @@ JWT_SECRET=replace_with_a_long_random_secret
 > 3. Choose **Drivers** → Node.js
 > 4. Copy the connection string and replace `<password>` with your database user password
 
-> In Atlas, open **Network Access → IP Access List → Add IP Address** and allow your current public IP (or `0.0.0.0/0` for local testing). Otherwise the API exits with "Could not connect to any servers in your MongoDB Atlas cluster".
+> In Atlas, open **Network Access → IP Access List → Add IP Address** and allow your current public IP (or `0.0.0.0/0` for local testing). If Atlas is unavailable, the API automatically uses `server/data.json` so the app still works locally.
 
 ```bash
 # 4. Start the server
@@ -198,7 +198,7 @@ node server.js
 
 # 5. Test the health endpoint
 curl http://localhost:5000/api/health
-# → {"status":"ok","service":"nexora-server","database":"connected"}
+# → {"status":"ok","service":"nexora-server","database":"connected"} (or "local")
 ```
 
 ---

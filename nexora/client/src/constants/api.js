@@ -1,12 +1,16 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
+function normalizeBaseUrl(url) {
+  const trimmed = url.replace(/\/+$/, '');
+  return /\/api(\/|$)/i.test(trimmed) ? trimmed : `${trimmed}/api`;
+}
+
 function resolveApiBaseUrl() {
   if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL.replace(/\/$/, '');
+    return normalizeBaseUrl(process.env.EXPO_PUBLIC_API_URL);
   }
 
-  // In Expo Go on a physical device, hostUri contains "<laptop-lan-ip>:<port>".
   const hostUri = Constants.expoConfig?.hostUri;
   if (hostUri) {
     const host = hostUri.split(':')[0];

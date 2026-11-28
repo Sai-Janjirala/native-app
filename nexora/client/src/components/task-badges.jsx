@@ -32,12 +32,13 @@ export function CategoryBadge({ category }) {
 
 const styles = StyleSheet.create({
   badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 999,
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '700',
+    letterSpacing: 0.1,
   },
 });

@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/screen-header';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Radii, Shadows, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { taskApi } from '@/services/taskApi';
 
@@ -200,11 +200,11 @@ const bar = StyleSheet.create({
     width: '70%',
     height: 90,
     backgroundColor: Colors.light.backgroundElement,
-    borderRadius: 4,
+    borderRadius: Radii.sm,
     overflow: 'hidden',
     justifyContent: 'flex-end',
   },
-  fill: { width: '100%', borderRadius: 4, minHeight: 4 },
+  fill: { width: '100%', borderRadius: Radii.sm, minHeight: 4 },
   valueLabel: {
     fontSize: 10,
     fontWeight: '700',
@@ -228,14 +228,16 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.surface,
     borderWidth: 1,
     borderColor: Colors.light.border,
-    borderRadius: 10,
+    borderRadius: Radii.lg,
     padding: Spacing.three,
+    ...Shadows.card,
   },
   cardTitle: {
     fontSize: 15,
     fontWeight: '700',
     color: Colors.light.text,
     marginBottom: Spacing.two,
+    letterSpacing: -0.2,
   },
   chartLegend: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
   legendDot: { width: 10, height: 10, borderRadius: 5 },
@@ -259,12 +261,12 @@ const styles = StyleSheet.create({
   groupLabelText: { fontSize: 13, fontWeight: '600', color: Colors.light.text },
   groupStat: { fontSize: 12, color: Colors.light.textSecondary, fontWeight: '600' },
   miniProgress: {
-    height: 6,
+    height: 7,
     backgroundColor: Colors.light.backgroundElement,
-    borderRadius: 3,
+    borderRadius: Radii.pill,
     overflow: 'hidden',
   },
-  miniProgressFill: { height: '100%', borderRadius: 3 },
+  miniProgressFill: { height: '100%', borderRadius: Radii.pill },
   recentRow: {
     paddingVertical: 8,
     borderBottomWidth: 1,
@@ -274,6 +276,12 @@ const styles = StyleSheet.create({
   recentMeta: { fontSize: 12, color: Colors.light.textSecondary },
   errorBox: { alignItems: 'center', marginTop: 40 },
   errorText: { color: Colors.light.danger, marginBottom: 12, fontSize: 14 },
-  retryBtn: { backgroundColor: Colors.light.primary, paddingHorizontal: 20, paddingVertical: 8, borderRadius: 8 },
+  retryBtn: {
+    backgroundColor: Colors.light.primary,
+    paddingHorizontal: 22,
+    paddingVertical: 10,
+    borderRadius: Radii.pill,
+    ...Shadows.accent,
+  },
   retryText: { color: Colors.light.primaryText, fontWeight: '700' },
 });

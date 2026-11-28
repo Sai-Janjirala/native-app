@@ -29,3 +29,6 @@ yarn-error.*
 .DS_Store
 Thumbs.db
 *.tsbuildinfo
+
+# Local offline store (contains local user data)
+**/server/data.json

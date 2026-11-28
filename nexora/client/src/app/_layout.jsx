@@ -1,4 +1,5 @@
 import { DefaultTheme, ThemeProvider } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
@@ -13,6 +14,10 @@ SplashScreen.preventAutoHideAsync();
 function RootNavigator() {
   const { user, isLoading } = useAuth();
 
+  useEffect(() => {
+    if (!isLoading) SplashScreen.hideAsync();
+  }, [isLoading]);
+
   if (isLoading) {
     return (
       <View style={styles.loader}>
@@ -25,12 +30,9 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
-  useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
-
   return (
     <ThemeProvider value={DefaultTheme}>
+      <StatusBar style="dark" />
       <AuthProvider>
         <RootNavigator />
       </AuthProvider>

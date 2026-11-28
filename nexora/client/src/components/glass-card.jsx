@@ -1,13 +1,18 @@
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { Platform, StyleSheet, View } from 'react-native';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Radii, Shadows, Spacing } from '@/constants/theme';
 
 const useNativeGlass = Platform.OS === 'ios' && isLiquidGlassAvailable();
 
 export function GlassCard({ children, style, variant = 'default' }) {
   if (variant === 'dark') {
-    return <View style={[styles.base, styles.dark, style]}>{children}</View>;
+    return (
+      <View style={[styles.base, styles.dark, style]}>
+        <View style={styles.darkHighlight} pointerEvents="none" />
+        {children}
+      </View>
+    );
   }
 
   if (useNativeGlass) {
@@ -35,7 +40,7 @@ export function GlassCard({ children, style, variant = 'default' }) {
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 16,
+    borderRadius: Radii.lg,
     padding: Spacing.three,
     overflow: 'hidden',
   },
@@ -44,33 +49,31 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.7)',
   },
   defaultFallback: {
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
     borderWidth: 1,
     borderColor: Colors.light.border,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    ...Shadows.card,
   },
   accentFallback: {
-    backgroundColor: 'rgba(239, 246, 255, 0.92)',
+    backgroundColor: 'rgba(239, 246, 255, 0.96)',
     borderWidth: 1,
     borderColor: '#BFDBFE',
-    shadowColor: '#1D4ED8',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    ...Shadows.accent,
+    shadowOpacity: 0.1,
   },
   dark: {
-    backgroundColor: Colors.light.black,
+    backgroundColor: Colors.light.dock,
     borderWidth: 1,
-    borderColor: '#1E293B',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.14,
-    shadowRadius: 12,
-    elevation: 4,
+    borderColor: 'rgba(148, 163, 184, 0.2)',
+    ...Shadows.floating,
+  },
+  darkHighlight: {
+    position: 'absolute',
+    top: 1,
+    left: 20,
+    right: 20,
+    height: 1,
+    borderRadius: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.14)',
   },
 });

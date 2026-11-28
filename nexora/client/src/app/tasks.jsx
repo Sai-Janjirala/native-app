@@ -16,7 +16,7 @@ import { Icon } from '@/components/icon';
 import { ScreenHeader } from '@/components/screen-header';
 import { CategoryBadge, PriorityBadge } from '@/components/task-badges';
 import { TaskFormModal } from '@/components/task-form-modal';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Radii, Shadows, Spacing } from '@/constants/theme';
 import { useTasks } from '@/hooks/use-tasks';
 import { formatDueLabel, isOverdue } from '@/utils/dates';
 
@@ -43,8 +43,15 @@ function sortTasks(tasks, filter) {
   });
 }
 
+const PRIORITY_ACCENT = {
+  high: '#F43F5E',
+  medium: '#F59E0B',
+  low: '#22C55E',
+};
+
 function TaskCard({ task, onToggle, onEdit, onDelete }) {
   const overdue = isOverdue(task);
+  const accent = PRIORITY_ACCENT[task.priority] || Colors.light.primary;
 
   function confirmDelete() {
     Alert.alert('Delete task', `Delete "${task.title}"? This cannot be undone.`, [
@@ -55,6 +62,7 @@ function TaskCard({ task, onToggle, onEdit, onDelete }) {
 
   return (
     <View style={[styles.taskCard, task.isCompleted && styles.taskCardDone]}>
+      <View style={[styles.cardAccent, { backgroundColor: accent }]} />
       <Pressable
         style={styles.checkArea}
         onPress={() => onToggle(task._id)}
@@ -167,7 +175,8 @@ export default function TasksScreen() {
           <ScreenHeader title="Tasks" subtitle={`${openCount} open · ${tasks.length} total`} />
         </View>
         <Pressable style={styles.addButton} onPress={openCreate}>
-          <Text style={styles.addButtonText}>+ New Task</Text>
+          <Icon ios="plus" android="add" size={16} color="#FFFFFF" />
+          <Text style={styles.addButtonText}>New Task</Text>
         </Pressable>
       </View>
 
@@ -255,10 +264,14 @@ const styles = StyleSheet.create({
   },
   headerText: { flex: 1 },
   addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     backgroundColor: Colors.light.primary,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: Radii.pill,
+    ...Shadows.accent,
   },
   addButtonText: { color: Colors.light.primaryText, fontWeight: '700', fontSize: 14 },
   filters: {
@@ -268,14 +281,20 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
   },
   filter: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    backgroundColor: Colors.light.backgroundElement,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: Radii.pill,
+    backgroundColor: Colors.light.surface,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
   },
-  filterSelected: { backgroundColor: Colors.light.primary },
+  filterSelected: {
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+    ...Shadows.soft,
+  },
   filterText: { fontSize: 13, fontWeight: '600', color: Colors.light.textSecondary },
-  filterTextSelected: { color: Colors.light.primaryText },
+  filterTextSelected: { color: Colors.light.primaryText, fontWeight: '700' },
   list: { flex: 1 },
   listContent: { padding: Spacing.three, gap: 10, paddingBottom: 104 },
   taskCard: {
@@ -284,18 +303,30 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.surface,
     borderWidth: 1,
     borderColor: Colors.light.border,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: Radii.lg,
+    padding: 14,
+    paddingLeft: 16,
     gap: 10,
+    overflow: 'hidden',
+    ...Shadows.card,
   },
-  taskCardDone: { opacity: 0.72 },
+  cardAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    borderTopLeftRadius: Radii.lg,
+    borderBottomLeftRadius: Radii.lg,
+  },
+  taskCardDone: { opacity: 0.7 },
   checkArea: { paddingTop: 1 },
   checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: '#C5CAD3',
+    width: 24,
+    height: 24,
+    borderRadius: Radii.xs + 2,
+    borderWidth: 1.8,
+    borderColor: Colors.light.borderStrong,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.light.surface,
@@ -326,8 +357,9 @@ const styles = StyleSheet.create({
   emptyActionBtn: {
     marginTop: 4,
     backgroundColor: Colors.light.primary,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 11,
+    borderRadius: Radii.pill,
+    ...Shadows.accent,
   },
 });

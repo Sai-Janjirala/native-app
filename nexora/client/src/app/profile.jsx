@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/screen-header';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Radii, Shadows, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import {
   getNotificationPermissionStatus,
@@ -166,19 +166,26 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.surface,
     borderWidth: 1,
     borderColor: Colors.light.border,
-    borderRadius: 10,
+    borderRadius: Radii.lg,
     padding: Spacing.three,
+    ...Shadows.card,
   },
-  cardTitle: { fontSize: 17, fontWeight: '700', color: Colors.light.text, marginBottom: Spacing.two },
-  metaLabel: { fontSize: 12, fontWeight: '600', color: Colors.light.textSecondary, marginTop: Spacing.two, marginBottom: 4 },
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: Colors.light.text,
+    marginBottom: Spacing.two,
+    letterSpacing: -0.2,
+  },
+  metaLabel: { fontSize: 12, fontWeight: '600', color: Colors.light.textMuted, marginTop: Spacing.two, marginBottom: 4 },
   metaValue: { fontSize: 15, color: Colors.light.text },
   input: {
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.light.surfaceMuted,
     borderWidth: 1,
     borderColor: Colors.light.border,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: Radii.md,
+    paddingHorizontal: 13,
+    paddingVertical: 11,
     fontSize: 15,
     color: Colors.light.text,
     marginBottom: Spacing.two,
@@ -187,16 +194,17 @@ const styles = StyleSheet.create({
   successText: { color: Colors.light.success, fontSize: 13, fontWeight: '600', marginBottom: Spacing.two },
   primaryButton: {
     backgroundColor: Colors.light.primary,
-    borderRadius: 8,
-    paddingVertical: 12,
+    borderRadius: Radii.pill,
+    paddingVertical: 13,
     alignItems: 'center',
     marginTop: Spacing.one,
+    ...Shadows.accent,
   },
   disabled: { opacity: 0.7 },
   primaryButtonText: { color: Colors.light.primaryText, fontSize: 15, fontWeight: '700' },
   notifDescription: { fontSize: 14, color: Colors.light.textSecondary, marginBottom: Spacing.two, lineHeight: 20 },
   notifBtn: {
-    borderRadius: 8,
+    borderRadius: Radii.pill,
     paddingVertical: 12,
     alignItems: 'center',
     marginTop: Spacing.two,
@@ -215,9 +223,9 @@ const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: Colors.light.surface,
     borderWidth: 1,
-    borderColor: Colors.light.danger,
-    borderRadius: 8,
-    paddingVertical: 12,
+    borderColor: '#FECDD3',
+    borderRadius: Radii.pill,
+    paddingVertical: 13,
     alignItems: 'center',
   },
   logoutButtonText: { color: Colors.light.danger, fontSize: 15, fontWeight: '700' },

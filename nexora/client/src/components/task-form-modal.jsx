@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Radii, Shadows, Spacing } from '@/constants/theme';
 import { addDaysInput, parseDueDateInput, toDateInput } from '@/utils/dates';
 
 const PRIORITIES = ['low', 'medium', 'high'];
@@ -211,21 +211,21 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
   },
   input: {
-    backgroundColor: Colors.light.surface,
+    backgroundColor: Colors.light.surfaceMuted,
     borderWidth: 1,
     borderColor: Colors.light.border,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: Radii.md,
+    paddingHorizontal: 13,
+    paddingVertical: 11,
     fontSize: 15,
     color: Colors.light.text,
   },
-  textArea: { minHeight: 80, textAlignVertical: 'top' },
+  textArea: { minHeight: 84, textAlignVertical: 'top' },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   pill: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: Radii.pill,
     borderWidth: 1,
     borderColor: Colors.light.border,
     backgroundColor: Colors.light.surface,
@@ -235,10 +235,11 @@ const styles = StyleSheet.create({
   pillTextActive: { color: Colors.light.primaryText },
   saveButton: {
     backgroundColor: Colors.light.primary,
-    borderRadius: 8,
-    paddingVertical: 13,
+    borderRadius: Radii.pill,
+    paddingVertical: 14,
     alignItems: 'center',
     marginTop: Spacing.four,
+    ...Shadows.accent,
   },
   disabled: { opacity: 0.7 },
   saveButtonText: { color: Colors.light.primaryText, fontSize: 15, fontWeight: '700' },
