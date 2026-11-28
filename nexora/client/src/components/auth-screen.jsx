@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Icon } from '@/components/icon';
 import { Colors, Radii, Shadows, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 
@@ -81,7 +82,9 @@ export function AuthScreen() {
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <View style={styles.hero}>
+          <View style={styles.heroBanner}>
+            <View style={styles.heroGlow} pointerEvents="none" />
+            <View style={styles.heroGlowSoft} pointerEvents="none" />
             <View style={styles.logo}>
               <Text style={styles.logoText}>N</Text>
             </View>
@@ -116,9 +119,12 @@ export function AuthScreen() {
             </View>
 
             <View style={styles.formHeader}>
-              <Text style={styles.cardTitle}>
-                {isRegister ? 'Create your account' : 'Sign in to Nexora'}
-              </Text>
+              <View style={styles.titleRow}>
+                <View style={styles.titleAccent} />
+                <Text style={styles.cardTitle}>
+                  {isRegister ? 'Create your account' : 'Sign in to Nexora'}
+                </Text>
+              </View>
               <Text style={styles.cardSubtitle}>
                 {isRegister
                   ? 'It only takes a few seconds.'
@@ -128,6 +134,7 @@ export function AuthScreen() {
 
             {error ? (
               <View style={styles.errorBox}>
+                <Icon ios="exclamationmark.circle.fill" android="error" size={16} color={Colors.light.danger} />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             ) : null}
@@ -135,53 +142,66 @@ export function AuthScreen() {
             {isRegister ? (
               <View style={styles.field}>
                 <Text style={styles.label}>Full name</Text>
-                <TextInput
-                  ref={nameRef}
-                  style={styles.input}
-                  placeholder="e.g. Alex Morgan"
-                  placeholderTextColor={Colors.light.textSecondary}
-                  value={name}
-                  onChangeText={setName}
-                  autoCapitalize="words"
-                  autoComplete="name"
-                  returnKeyType="next"
-                  blurOnSubmit={false}
-                  editable={!submitting}
-                  maxLength={60}
-                  onSubmitEditing={() => emailRef.current?.focus()}
-                />
+                <View style={styles.inputWrap}>
+                  <View style={styles.inputIcon} pointerEvents="none">
+                    <Icon ios="person.fill" android="person" size={17} color={Colors.light.textMuted} />
+                  </View>
+                  <TextInput
+                    ref={nameRef}
+                    style={[styles.input, styles.inputWithIcon]}
+                    placeholder="e.g. Alex Morgan"
+                    placeholderTextColor={Colors.light.textMuted}
+                    value={name}
+                    onChangeText={setName}
+                    autoCapitalize="words"
+                    autoComplete="name"
+                    returnKeyType="next"
+                    blurOnSubmit={false}
+                    editable={!submitting}
+                    maxLength={60}
+                    onSubmitEditing={() => emailRef.current?.focus()}
+                  />
+                </View>
               </View>
             ) : null}
 
             <View style={styles.field}>
               <Text style={styles.label}>Email</Text>
-              <TextInput
-                ref={emailRef}
-                style={styles.input}
-                placeholder="you@example.com"
-                placeholderTextColor={Colors.light.textSecondary}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="email"
-                textContentType="username"
-                returnKeyType="next"
-                blurOnSubmit={false}
-                editable={!submitting}
-                onSubmitEditing={() => passwordRef.current?.focus()}
-              />
+              <View style={styles.inputWrap}>
+                <View style={styles.inputIcon} pointerEvents="none">
+                  <Icon ios="envelope.fill" android="mail" size={17} color={Colors.light.textMuted} />
+                </View>
+                <TextInput
+                  ref={emailRef}
+                  style={[styles.input, styles.inputWithIcon]}
+                  placeholder="you@example.com"
+                  placeholderTextColor={Colors.light.textMuted}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="email"
+                  textContentType="username"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                  editable={!submitting}
+                  onSubmitEditing={() => passwordRef.current?.focus()}
+                />
+              </View>
             </View>
 
             <View style={styles.field}>
               <Text style={styles.label}>Password</Text>
-              <View style={styles.passwordWrap}>
+              <View style={styles.inputWrap}>
+                <View style={styles.inputIcon} pointerEvents="none">
+                  <Icon ios="lock.fill" android="lock" size={17} color={Colors.light.textMuted} />
+                </View>
                 <TextInput
                   ref={passwordRef}
-                  style={[styles.input, styles.passwordInput]}
+                  style={[styles.input, styles.inputWithIcon, styles.passwordInput]}
                   placeholder={isRegister ? 'At least 6 characters' : 'Your password'}
-                  placeholderTextColor={Colors.light.textSecondary}
+                  placeholderTextColor={Colors.light.textMuted}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -196,9 +216,15 @@ export function AuthScreen() {
                 <Pressable
                   style={styles.visibilityButton}
                   onPress={() => setShowPassword((visible) => !visible)}
+                  hitSlop={8}
                   accessibilityRole="button"
                   accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}>
-                  <Text style={styles.visibilityText}>{showPassword ? 'Hide' : 'Show'}</Text>
+                  <Icon
+                    ios={showPassword ? 'eye.slash.fill' : 'eye.fill'}
+                    android={showPassword ? 'visibility_off' : 'visibility'}
+                    size={18}
+                    color={Colors.light.primary}
+                  />
                 </Pressable>
               </View>
               <Text style={styles.hint}>
@@ -262,18 +288,47 @@ const styles = StyleSheet.create({
     padding: Spacing.three,
     paddingVertical: Spacing.four,
   },
-  hero: {
+  heroBanner: {
+    backgroundColor: Colors.light.dock,
+    borderRadius: Radii.xl,
+    paddingVertical: Spacing.four,
+    paddingHorizontal: Spacing.three,
     alignItems: 'center',
-    marginBottom: Spacing.four,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(148, 163, 184, 0.2)',
+    ...Shadows.floating,
+  },
+  heroGlow: {
+    position: 'absolute',
+    top: -80,
+    right: -50,
+    width: 210,
+    height: 210,
+    borderRadius: 105,
+    backgroundColor: Colors.light.primary,
+    opacity: 0.35,
+  },
+  heroGlowSoft: {
+    position: 'absolute',
+    bottom: -90,
+    left: -60,
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    backgroundColor: Colors.light.indigo,
+    opacity: 0.22,
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 62,
+    height: 62,
     borderRadius: Radii.lg,
     backgroundColor: Colors.light.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
     ...Shadows.accent,
   },
   logoText: {
@@ -282,17 +337,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   brand: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '800',
-    color: Colors.light.text,
+    color: '#FFFFFF',
     letterSpacing: -0.8,
   },
   tagline: {
     fontSize: 14,
-    color: Colors.light.textMuted,
-    marginTop: 6,
+    color: '#94A3B8',
+    marginTop: 8,
     lineHeight: 20,
     textAlign: 'center',
+    maxWidth: 280,
   },
   card: {
     backgroundColor: Colors.light.surface,
@@ -300,6 +356,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.border,
     borderRadius: Radii.xl,
     padding: Spacing.three,
+    marginTop: Spacing.three,
     ...Shadows.card,
   },
   segment: {
@@ -331,25 +388,43 @@ const styles = StyleSheet.create({
   formHeader: {
     marginBottom: Spacing.three,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+  },
+  titleAccent: {
+    width: 4,
+    height: 20,
+    borderRadius: Radii.pill,
+    backgroundColor: Colors.light.primary,
+  },
   cardTitle: {
     fontSize: 21,
-    fontWeight: '700',
+    fontWeight: '800',
     color: Colors.light.text,
+    letterSpacing: -0.3,
   },
   cardSubtitle: {
     fontSize: 13,
-    color: Colors.light.textSecondary,
+    color: Colors.light.textMuted,
     marginTop: 4,
+    paddingLeft: 13,
   },
   errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
-    borderRadius: 10,
-    padding: Spacing.two + 4,
+    borderRadius: Radii.md,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     marginBottom: Spacing.three,
   },
   errorText: {
+    flex: 1,
     color: Colors.light.danger,
     fontSize: 13,
     fontWeight: '600',
@@ -364,6 +439,15 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     marginBottom: 7,
   },
+  inputWrap: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  inputIcon: {
+    position: 'absolute',
+    left: 13,
+    zIndex: 1,
+  },
   input: {
     backgroundColor: Colors.light.surfaceMuted,
     borderWidth: 1,
@@ -374,11 +458,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.light.text,
   },
-  passwordWrap: {
-    position: 'relative',
+  inputWithIcon: {
+    paddingLeft: 42,
   },
   passwordInput: {
-    paddingRight: 64,
+    paddingRight: 46,
   },
   visibilityButton: {
     position: 'absolute',
@@ -388,20 +472,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 8,
   },
-  visibilityText: {
-    color: Colors.light.primary,
-    fontSize: 13,
-    fontWeight: '700',
-  },
   hint: {
     fontSize: 12,
-    color: Colors.light.textSecondary,
+    color: Colors.light.textMuted,
     marginTop: 6,
   },
   primaryButton: {
     backgroundColor: Colors.light.primary,
     borderRadius: Radii.pill,
-    paddingVertical: 14,
+    paddingVertical: 15,
     alignItems: 'center',
     marginTop: Spacing.one,
     ...Shadows.accent,
@@ -435,7 +514,7 @@ const styles = StyleSheet.create({
   },
   footerNote: {
     marginTop: Spacing.three,
-    color: Colors.light.textSecondary,
+    color: Colors.light.textMuted,
     fontSize: 12,
     textAlign: 'center',
   },
