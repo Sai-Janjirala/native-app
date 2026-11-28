@@ -33,10 +33,25 @@
       ]
     ],
     "extra": {
-      "apiUrl": ""
+      "apiUrl": "",
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "d6890b53-a2ba-4223-b7a9-ef58d64b53a6"
+      }
     },
     "experiments": {
       "reactCompiler": true
-    }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d6890b53-a2ba-4223-b7a9-ef58d64b53a6"
+    },
+    "ios": {}
   }
 }
