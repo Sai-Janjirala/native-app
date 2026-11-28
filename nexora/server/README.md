@@ -17,6 +17,28 @@ npm install
 node server.js
 ```
 
+## Network Access (phone on same Wi-Fi / hotspot)
+
+The server binds to `HOST` (default `0.0.0.0`) on `PORT` (default `5000`), so it
+accepts connections from other devices on your network — not just `localhost`.
+On startup it prints the reachable Network URLs, e.g.:
+
+```
+Nexora server running on port 5000 (bound to 0.0.0.0)
+Local:   http://localhost:5000/api/health
+Network: http://10.164.109.249:5000/api/health
+```
+
+If your phone still cannot connect, allow the port through Windows Firewall
+(run in an elevated PowerShell):
+
+```powershell
+New-NetFirewallRule -DisplayName "Nexora API 5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow
+```
+
+CORS allows all origins by default. To restrict it, set `CORS_ORIGIN` in `.env`
+to a comma-separated list of allowed origins.
+
 ## Folder Structure
 
 ```

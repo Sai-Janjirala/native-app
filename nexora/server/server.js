@@ -1,3 +1,4 @@
+const os = require('os');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
@@ -8,12 +9,39 @@ const mongoose = require('mongoose');
 const connectDB = require('./config/db');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
+// Bind to all interfaces so phones on the same Wi-Fi/hotspot can reach the API.
+const HOST = process.env.HOST || '0.0.0.0';
 
 let usingLocalStore = false;
 
-app.use(cors());
+// Native Expo Go requests are not subject to browser CORS, but Expo web and
+// browsers are. Allow everything by default; restrict via CORS_ORIGIN if needed
+// (comma-separated list, e.g. "https://app.example.com").
+const corsOrigin = process.env.CORS_ORIGIN;
+app.use(
+  cors(
+    corsOrigin
+      ? { origin: corsOrigin.split(',').map((origin) => origin.trim()) }
+      : {}
+  )
+);
 app.use(express.json());
+
+function getLanAddresses() {
+  const interfaces = os.networkInterfaces();
+  const addresses = [];
+
+  for (const name of Object.keys(interfaces)) {
+    for (const net of interfaces[name] || []) {
+      if (net.family === 'IPv4' && !net.internal) {
+        addresses.push(net.address);
+      }
+    }
+  }
+
+  return addresses;
+}
 
 app.get('/api/health', (req, res) => {
   const dbReady = mongoose.connection.readyState === 1;
@@ -62,9 +90,32 @@ async function startServer() {
     });
   });
 
-  app.listen(PORT, () => {
-    console.log(`Nexora server running on port ${PORT}`);
+  const server = app.listen(PORT, HOST, () => {
+    console.log(`Nexora server running on port ${PORT} (bound to ${HOST})`);
+    console.log(`Local:   http://localhost:${PORT}/api/health`);
+
+    const lanAddresses = getLanAddresses();
+    if (lanAddresses.length === 0) {
+      console.log('Network: no LAN IPv4 address detected.');
+    } else {
+      for (const address of lanAddresses) {
+        console.log(`Network: http://${address}:${PORT}/api/health`);
+      }
+      console.log('Use one of the Network URLs above on your phone (same Wi-Fi/hotspot).');
+    }
+
     console.log(`Storage: ${usingLocalStore ? 'local offline store' : 'MongoDB'}`);
+  });
+
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(
+        `Port ${PORT} is already in use. Stop the other process or change PORT in server/.env.`
+      );
+    } else {
+      console.error(`Failed to start server: ${error.message}`);
+    }
+    process.exit(1);
   });
 }
 

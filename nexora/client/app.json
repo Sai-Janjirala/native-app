@@ -32,6 +32,9 @@
         }
       ]
     ],
+    "extra": {
+      "apiUrl": ""
+    },
     "experiments": {
       "reactCompiler": true
     }
